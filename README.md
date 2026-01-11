@@ -100,6 +100,4 @@ Contributions are welcome!
 
 Please open an Issue first for major changes to discuss your proposal.
 
-## License
 
-MIT License (will be added). If you’d like, I can add the LICENSE file now.
