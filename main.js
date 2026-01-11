@@ -18,7 +18,7 @@ function createOverlayWindow() {
     skipTaskbar: true,
     resizable: false,
     hasShadow: false,
-    show: false, // 👈 IMPORTANT
+    show: false, 
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -44,7 +44,7 @@ function createControlWindow() {
     alwaysOnTop: true,
     skipTaskbar: true,
     resizable: false,
-    show: false, // 👈 IMPORTANT
+    show: false, 
     webPreferences: {
       nodeIntegration: true,
       contextIsolation: false,
@@ -59,7 +59,7 @@ app.whenReady().then(() => {
   createOverlayWindow();
   createControlWindow();
 
-  // 🔦 Toggle ring light
+  // Toggle ring light
   globalShortcut.register("CommandOrControl+Shift+K", () => {
     if (!overlayWindow) return;
 
@@ -68,7 +68,7 @@ app.whenReady().then(() => {
       : overlayWindow.show();
   });
 
-  // 🎛 Toggle control panel
+  // Toggle control panel
   globalShortcut.register("CommandOrControl+Shift+C", () => {
     if (!controlWindow) return;
 
