@@ -1,0 +1,44 @@
+{
+  "name": "ring-light",
+  "version": "1.0.0",
+  "description": "Full Screen Border Ring Light for Windows",
+  "main": "main.js",
+
+  "scripts": {
+    "start": "electron .",
+    "dev": "nodemon --legacy-watch --ignore node_modules --exec electron .",
+    "build": "electron-builder"
+  },
+
+  "build": {
+    "appId": "com.ringlight.app",
+    "productName": "Ring Light",
+
+    "asar": true,
+
+    "files": [
+      "**/*",
+      "!node_modules/.cache/**"
+    ],
+
+    "win": {
+      "target": "nsis",
+      "icon": "assets/icon.ico"
+    },
+
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true
+    },
+
+    "artifactName": "${productName}-Setup-${version}.${ext}"
+  },
+
+  "devDependencies": {
+    "electron": "^39.2.7",
+    "electron-builder": "^26.4.0",
+    "nodemon": "^3.1.11"
+  }
+}

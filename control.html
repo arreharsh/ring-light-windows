@@ -1,0 +1,518 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Ring Light Controls</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+        background: transparent;
+        overflow: hidden;
+        padding: 0;
+        -webkit-app-region: drag;
+      }
+
+      .container {
+        width: 300px;
+        height: 380px;
+        background: rgba(28, 28, 30, 0.65);
+        backdrop-filter: blur(24px) saturate(180%);
+        -webkit-backdrop-filter: blur(24px) saturate(180%);
+        border-radius: 16px;
+        padding: 24px;
+        border: 1px solid rgba(255, 255, 255, 0.12);
+        display: flex;
+        flex-direction: column;
+        scrollbar-width: none;
+        overflow: scroll;
+      }
+
+      .header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        -webkit-app-region: no-drag;
+      }
+
+      .window-controls {
+        display: flex;
+        gap: 8px;
+      }
+
+      .control-btn {
+        width: 13px;
+        height: 13px;
+        border-radius: 50%;
+        border: none;
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+      }
+
+      .control-btn::after {
+        content: "";
+        position: absolute;
+        inset: -4px;
+        border-radius: 50%;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+
+      .control-btn:hover::after {
+        opacity: 0.2;
+        background: currentColor;
+      }
+
+      .close {
+        background: #ff5f57;
+        color: #ff5f57;
+      }
+      .minimize {
+        background: #ffbd2e;
+        color: #ffbd2e;
+      }
+      .maximize {
+        background: #28ca42;
+        color: #28ca42;
+      }
+
+      .title {
+        color: rgba(255, 255, 255, 0.95);
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+      }
+
+      .preview {
+        height: 180px;
+        background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+        border-radius: 18px;
+        margin-bottom: 24px;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        box-shadow: inset 0 2px 8px rgba(0, 0, 0, 0.3),
+          0 4px 16px rgba(0, 0, 0, 0.2);
+      }
+
+      .preview-content {
+        position: absolute;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+
+      .preview-icon {
+        color: rgba(255, 255, 255, 0.1);
+        font-size: 48px;
+        font-weight: 300;
+      }
+
+      .preview-border {
+        position: absolute;
+        transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .preview-top,
+      .preview-bottom {
+        left: 0;
+        right: 0;
+        height: var(--preview-size, 30px);
+      }
+
+      .preview-top {
+        top: 0;
+        background: linear-gradient(
+          180deg,
+          var(--preview-color) 0%,
+          rgba(var(--preview-rgb), 0.6) 40%,
+          transparent 100%
+        );
+        filter: blur(4px);
+        opacity: var(--preview-opacity);
+      }
+
+      
+
+      
+      .controls {
+        -webkit-app-region: no-drag;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+      }
+
+      .control-group {
+        margin-bottom: 22px;
+      }
+
+      .control-label {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 10px;
+        color: rgba(255, 255, 255, 0.75);
+        font-size: 13px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+      }
+
+      .control-value {
+        color: rgba(255, 255, 255, 0.95);
+        font-weight: 700;
+        font-size: 13px;
+        background: rgba(255, 255, 255, 0.08);
+        padding: 4px 10px;
+        border-radius: 8px;
+      }
+
+      .slider {
+        width: 100%;
+        height: 8px;
+        border-radius: 10px;
+        outline: none;
+        -webkit-appearance: none;
+        cursor: pointer;
+        background: #374151;
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.3);
+        transition: all 0.2s;
+      }
+
+      .slider:hover {
+        box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.4);
+      }
+
+      .slider::-webkit-slider-thumb {
+        -webkit-appearance: none;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+        cursor: pointer;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3),
+          0 0 0 3px rgba(59, 130, 246, 0.3);
+        transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+
+      .slider::-webkit-slider-thumb:hover {
+        transform: scale(1.1);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4),
+          0 0 0 4px rgba(59, 130, 246, 0.4);
+      }
+
+      .slider::-webkit-slider-thumb:active {
+        transform: scale(1.05);
+      }
+
+      .toggle-container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 22px;
+        padding: 14px 18px;
+        background: rgba(255, 255, 255, 0.03);
+        border-radius: 10px;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+      }
+
+      .toggle-label {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 14px;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+      }
+
+      .toggle {
+        position: relative;
+        width: 56px;
+        height: 32px;
+        background: #374151;
+        border-radius: 16px;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
+
+      .toggle.active {
+        background: linear-gradient(135deg, #01ff16 0%, #25eb46 100%);
+      }
+
+      .toggle-thumb {
+        position: absolute;
+        top: 4px;
+        left: 4px;
+        width: 24px;
+        height: 24px;
+        background: linear-gradient(135deg, #ffffff 0%, #f0f0f0 100%);
+        border-radius: 50%;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+      }
+
+      .toggle.active .toggle-thumb {
+        transform: translateX(24px);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+      }
+
+      .info {
+        background: rgba(78, 78, 78, 0.08);
+        padding: 14px 16px;
+        border-radius: 8px;
+        border: 1px solid rgba(59, 130, 246, 0.15);
+        margin-top: auto;
+      }
+
+      .info-text {
+        color: rgb(255, 255, 255);
+        font-size: 14px;
+      }
+
+      .shortcut {
+        color: rgba(255, 255, 255, 0.85);
+        background: rgba(255, 255, 255, 0.12);
+        display: inline-block;
+        margin: 8px;
+        padding: 3px 8px;
+        border-radius: 4px;
+        font-family: "SF Mono", "Monaco", "Consolas", monospace;
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .tooltip {
+        position: relative;
+      }
+
+      .tooltip-text {
+        position: absolute;
+        top: 120%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: #111;
+        color: #fff;
+        padding: 6px 10px;
+        border-radius: 6px;
+        font-size: 12px;
+        white-space: nowrap;
+
+        opacity: 0;
+        visibility: hidden;
+        transition: 0.2s ease;
+      }
+
+      .tooltip:hover .tooltip-text {
+        opacity: 1;
+        visibility: visible;
+      }
+      .tooltip-text::after {
+        content: "";
+        position: absolute;
+        top: -6px;
+        left: 50%;
+        transform: translateX(-50%);
+        border: 6px solid transparent;
+        border-top-color: #111;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <div class="window-controls">
+          <button class="control-btn close" onclick="closeWindow()"></button>
+          <button
+            class="control-btn minimize"
+            onclick="minimizeWindow()"
+          ></button>
+        </div>
+        <div class="title">Ring Light</div>
+        <div style="width: 60px"></div>
+      </div>
+
+      <div class="controls">
+        <div class="toggle-container">
+          <span class="toggle-label">Power</span>
+          <div class="tooltip">
+            <div class="toggle active" id="powerToggle" onclick="togglePower()">
+              <div class="toggle-thumb"></div>
+            </div>
+            <div class="tooltip-text">Ctrl+Shift+K</div>
+          </div>
+        </div>
+
+        <div class="control-group">
+          <div class="control-label">
+            <span>Brightness</span>
+            <span class="control-value" id="brightnessValue">80%</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value="100"
+            class="slider"
+            id="brightnessSlider"
+            oninput="updateSettings()"
+          />
+        </div>
+
+        <div class="control-group">
+          <div class="control-label">
+            <span>Temperature</span>
+            <span class="control-value" id="temperatureValue">Neutral</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value="50"
+            class="slider"
+            id="temperatureSlider"
+            oninput="updateSettings()"
+          />
+        </div>
+
+        <div class="control-group">
+          <div class="control-label">
+            <span>Border Size</span>
+            <span class="control-value" id="sizeValue">60%</span>
+          </div>
+          <input
+            type="range"
+            min="0"
+            max="100"
+            value="60"
+            class="slider"
+            id="sizeSlider"
+            oninput="updateSettings()"
+          />
+        </div>
+
+        <div class="info">
+          <p class="info-text">
+            <span class="shortcut">Ctrl+Shift+K</span> Toggle Light
+          </p>
+          <p class="info-text">
+            <span class="shortcut">Ctrl+Shift+C</span> Controls Panel
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <script>
+      const { ipcRenderer } = require("electron");
+
+      let settings = {
+        isOn: true,
+        brightness: 100,
+        temperature: 50,
+        size: 60,
+      };
+
+      function getColor(temp) {
+        const r = Math.round(200 + temp * 0.55);
+        const g = Math.round(220 - temp * 0.2);
+        const b = Math.round(255 - temp * 1.55);
+        return { r, g, b };
+      }
+
+      function updatePreview() {
+        const { r, g, b } = getColor(settings.temperature);
+        const color = `rgba(${r}, ${g}, ${b}, 1)`;
+        const opacity = settings.isOn ? (settings.brightness / 100) * 0.85 : 0;
+        const size = Math.round((settings.size / 100) * 40 + 20); // 20px to 60px for preview
+
+        document.documentElement.style.setProperty("--preview-color", color);
+        document.documentElement.style.setProperty(
+          "--preview-rgb",
+          `${r}, ${g}, ${b}`
+        );
+        document.documentElement.style.setProperty(
+          "--preview-opacity",
+          opacity
+        );
+        document.documentElement.style.setProperty(
+          "--preview-size",
+          `${size}px`
+        );
+      }
+
+      function updateSettings() {
+        settings.brightness = parseInt(
+          document.getElementById("brightnessSlider").value
+        );
+        settings.temperature = parseInt(
+          document.getElementById("temperatureSlider").value
+        );
+        settings.size = parseInt(document.getElementById("sizeSlider").value);
+
+        document.getElementById("brightnessValue").textContent =
+          settings.brightness + "%";
+
+        const tempLabel =
+          settings.temperature < 40
+            ? "Cool"
+            : settings.temperature > 60
+            ? "Warm"
+            : "Neutral";
+        document.getElementById("temperatureValue").textContent = tempLabel;
+
+        document.getElementById("sizeValue").textContent = settings.size + "%";
+
+        updateSliderBackgrounds();
+        updatePreview();
+
+        ipcRenderer.send("update-overlay", settings);
+      }
+
+      function togglePower() {
+        settings.isOn = !settings.isOn;
+        document.getElementById("powerToggle").classList.toggle("active");
+        updatePreview();
+        ipcRenderer.send("update-overlay", settings);
+        ipcRenderer.send("toggle-overlay", settings.isOn);
+      }
+
+      function updateSliderBackgrounds() {
+        const brightness = settings.brightness;
+        const temperature = settings.temperature;
+        const size = settings.size;
+
+        document.getElementById(
+          "brightnessSlider"
+        ).style.background = `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${brightness}%, #374151 ${brightness}%, #374151 100%)`;
+
+        const { r: r1, g: g1, b: b1 } = getColor(0);
+        const { r: r2, g: g2, b: b2 } = getColor(100);
+        document.getElementById(
+          "temperatureSlider"
+        ).style.background = `linear-gradient(to right, rgb(${r1}, ${g1}, ${b1}) 0%, rgb(${r2}, ${g2}, ${b2}) 100%)`;
+
+        document.getElementById(
+          "sizeSlider"
+        ).style.background = `linear-gradient(to right, #3b82f6 0%, #3b82f6 ${size}%, #374151 ${size}%, #374151 100%)`;
+      }
+
+      function minimizeWindow() {
+        ipcRenderer.send("minimize-control");
+      }
+
+      function closeWindow() {
+        ipcRenderer.send("close-control");
+      }
+
+      updateSettings();
+    </script>
+  </body>
+</html>

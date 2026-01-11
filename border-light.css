@@ -1,0 +1,89 @@
+#border-ring-light {
+  position: fixed;
+  inset: 0;
+  z-index: 999999;
+  pointer-events: none;
+}
+
+.border-top, .border-bottom, .border-left, .border-right {
+  position: fixed;
+  pointer-events: none;
+  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.border-top {
+  top: 0;
+  left: 0;
+  right: 0;
+  height: var(--border-size, 100px);
+  background: linear-gradient(
+    180deg,
+    var(--light-color) 0%,
+    rgba(var(--light-rgb), 0.7) 25%,
+    rgba(var(--light-rgb), 0.3) 60%,
+    transparent 100%
+  );
+  filter: blur(var(--blur-size, 10px));
+  opacity: var(--opacity, 0.8);
+}
+
+.border-bottom {
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: var(--border-size, 100px);
+  background: linear-gradient(
+    0deg,
+    var(--light-color) 0%,
+    rgba(var(--light-rgb), 0.7) 25%,
+    rgba(var(--light-rgb), 0.3) 60%,
+    transparent 100%
+  );
+  filter: blur(var(--blur-size, 10px));
+  opacity: var(--opacity, 0.8);
+}
+
+.border-left {
+  top: 0;
+  left: 0;
+  bottom: 0;
+  width: var(--border-size, 100px);
+  background: linear-gradient(
+    90deg,
+    var(--light-color) 0%,
+    rgba(var(--light-rgb), 0.7) 25%,
+    rgba(var(--light-rgb), 0.3) 60%,
+    transparent 100%
+  );
+  filter: blur(var(--blur-size, 10px));
+  opacity: var(--opacity, 0.8);
+}
+
+.border-right {
+  top: 0;
+  right: 0;
+  bottom: 0;
+  width: var(--border-size, 100px);
+  background: linear-gradient(
+    270deg,
+    var(--light-color) 0%,
+    rgba(var(--light-rgb), 0.7) 25%,
+    rgba(var(--light-rgb), 0.3) 60%,
+    transparent 100%
+  );
+  filter: blur(var(--blur-size, 10px));
+  opacity: var(--opacity, 0.8);
+}
+
+.ambient-glow {
+  position: fixed;
+  inset: 0;
+  background: 
+    radial-gradient(ellipse 70% 40% at 50% 0%, rgba(var(--light-rgb), 0.2), transparent 70%),
+    radial-gradient(ellipse 70% 40% at 50% 100%, rgba(var(--light-rgb), 0.2), transparent 70%),
+    radial-gradient(ellipse 40% 70% at 0% 50%, rgba(var(--light-rgb), 0.2), transparent 70%),
+    radial-gradient(ellipse 40% 70% at 100% 50%, rgba(var(--light-rgb), 0.2), transparent 70%);
+  filter: blur(60px);
+  opacity: calc(var(--opacity, 0.8) * 0.4);
+  pointer-events: none;
+}
