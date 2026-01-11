@@ -103,8 +103,7 @@ Contributions are welcome!
 
 Please open an Issue first for major changes to discuss your proposal.
 
-# Note 
-
+# Note:
 ## ⚠ Windows SmartScreen Notice
 
 ```
