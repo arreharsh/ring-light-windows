@@ -1,15 +1,15 @@
-const { app, BrowserWindow, ipcMain, globalShortcut, screen } = require('electron');
-const path = require('path');
+const { app, BrowserWindow, ipcMain, globalShortcut, screen } = require("electron");
+const path = require("path");
 
 let overlayWindow;
 let controlWindow;
 
 function createOverlayWindow() {
   const { width, height } = screen.getPrimaryDisplay().bounds;
-  
+
   overlayWindow = new BrowserWindow({
-    width: width,
-    height: height,
+    width,
+    height,
     x: 0,
     y: 0,
     frame: false,
@@ -18,20 +18,21 @@ function createOverlayWindow() {
     skipTaskbar: true,
     resizable: false,
     hasShadow: false,
+    show: false, // 👈 IMPORTANT
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false
-    }
+      contextIsolation: false,
+    },
   });
 
-  overlayWindow.loadFile('overlay.html');
+  overlayWindow.loadFile("overlay.html");
   overlayWindow.setIgnoreMouseEvents(true, { forward: true });
-  overlayWindow.setAlwaysOnTop(true, 'screen-saver');
+  overlayWindow.setAlwaysOnTop(true, "screen-saver");
 }
 
 function createControlWindow() {
   const { width, height } = screen.getPrimaryDisplay().workAreaSize;
-  
+
   controlWindow = new BrowserWindow({
     width: 300,
     height: 380,
@@ -43,71 +44,70 @@ function createControlWindow() {
     alwaysOnTop: true,
     skipTaskbar: true,
     resizable: false,
+    show: false, // 👈 IMPORTANT
     webPreferences: {
       nodeIntegration: true,
-      contextIsolation: false
-    }
+      contextIsolation: false,
+    },
   });
 
-  controlWindow.loadFile('control.html');
+  controlWindow.loadFile("control.html");
 }
 
-app.setLoginItemSettings({
-  openAtLogin: true,
-  path: app.getPath('exe')
-});
 
 app.whenReady().then(() => {
   createOverlayWindow();
   createControlWindow();
 
-  globalShortcut.register('CommandOrControl+Shift+k', () => {
-    if (overlayWindow.isVisible()) {
-      overlayWindow.hide();
-    } else {
-      overlayWindow.show();
-    }
+  // 🔦 Toggle ring light
+  globalShortcut.register("CommandOrControl+Shift+K", () => {
+    if (!overlayWindow) return;
+
+    overlayWindow.isVisible()
+      ? overlayWindow.hide()
+      : overlayWindow.show();
   });
 
-  globalShortcut.register('CommandOrControl+Shift+C', () => {
-    if (controlWindow.isVisible()) {
-      controlWindow.hide();
-    } else {
-      controlWindow.show();
-    }
+  // 🎛 Toggle control panel
+  globalShortcut.register("CommandOrControl+Shift+C", () => {
+    if (!controlWindow) return;
+
+    controlWindow.isVisible()
+      ? controlWindow.hide()
+      : controlWindow.show();
   });
 });
 
-app.on('window-all-closed', () => {
-  if (process.platform !== 'darwin') {
-    app.quit();
-  }
+
+app.on("window-all-closed", (e) => {
+  e.preventDefault();
 });
 
-app.on('will-quit', () => {
+app.on("will-quit", () => {
   globalShortcut.unregisterAll();
 });
 
-ipcMain.on('update-overlay', (event, settings) => {
-  overlayWindow.webContents.send('settings-changed', settings);
-});
 
-ipcMain.on('toggle-overlay', (event, visible) => {
-  if (visible) {
-    overlayWindow.show();
-  } else {
-    overlayWindow.hide();
+ipcMain.on("update-overlay", (event, settings) => {
+  if (overlayWindow) {
+    overlayWindow.webContents.send("settings-changed", settings);
   }
 });
 
-ipcMain.on('minimize-control', () => {
-  controlWindow.minimize();
+ipcMain.on("toggle-overlay", (event, visible) => {
+  if (!overlayWindow) return;
+
+  visible ? overlayWindow.show() : overlayWindow.hide();
 });
 
-ipcMain.on('close-control', () => {
-  controlWindow.hide();
+ipcMain.on("minimize-control", () => {
+  if (controlWindow) controlWindow.hide();
 });
 
-ipcMain.on('quit-app', () => {
+ipcMain.on("close-control", () => {
+  if (controlWindow) controlWindow.hide();
+});
+
+ipcMain.on("quit-app", () => {
   app.quit();
 });
