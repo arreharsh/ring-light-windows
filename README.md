@@ -1,5 +1,8 @@
 # Ring Light for Windows
 
+![Ring Light for Windows Preview](assets/preview.png)
+
+
 A lightweight Electron-based Windows app that replicates the macOS "ring light" feature to improve your lighting on video calls. Built with HTML, CSS, and JavaScript.
 
 - Works across Zoom, Google Meet, Microsoft Teams, Discord, and more
