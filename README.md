@@ -103,4 +103,16 @@ Contributions are welcome!
 
 Please open an Issue first for major changes to discuss your proposal.
 
+# Note 
+
+## ⚠ Windows SmartScreen Notice
+
+```
+This app is not yet digitally signed.
+Windows may show a “not commonly downloaded” warning.
+
+Click **More info → Run anyway** to continue.
+The app is safe and runs entirely locally.
+
+
 
